@@ -3,7 +3,6 @@ package org.wetator;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.util.DirectoryScanner;
@@ -14,7 +13,7 @@ import java.io.File;
 /**
  * This is the main Mojo for executing wetator tests.
  */
-@Mojo(name = "execute", defaultPhase = LifecyclePhase.INTEGRATION_TEST)
+@Mojo(name = "execute")
 public class WetatorMojo extends AbstractMojo {
 
     /**
@@ -36,6 +35,10 @@ public class WetatorMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        getLog().info("start running wetator tests ...");
+        getLog().info("using config file: " + configFile);
+        getLog().info("using wetator test file directory: " + testFileDir);
+
         try {
             final WetatorEngine wetatorEngine = new WetatorEngine();
             wetatorEngine.setConfigFileName(configFile);
@@ -46,17 +49,19 @@ public class WetatorMojo extends AbstractMojo {
             final DirectoryScanner directoryScanner = new DirectoryScanner();
             directoryScanner.setBasedir(testFileDir);
             directoryScanner.setIncludes(new String[]{INCLUDE_FILE_PATTERN});
-            directoryScanner.setCaseSensitive(true);
             directoryScanner.scan();
 
-            final String[] weatorTestFilename = directoryScanner.getIncludedFiles();
+            final String[] weatorTestFilenames = directoryScanner.getIncludedFiles();
 
-            for (int i = 0; i < weatorTestFilename.length; i++) {
-                final String filename = weatorTestFilename[i];
+            for (int i = 0; i < weatorTestFilenames.length; i++) {
+                final String filename = weatorTestFilenames[i];
+                getLog().info("adding test file: " + filename);
                 wetatorEngine.addTestCase(filename, new File(directoryScanner.getBasedir(), filename));
             }
 
             wetatorEngine.executeTests();
+
+            getLog().info("wetator test execution complete!");
         } catch (Exception e) {
             getLog().error(e.getMessage(), e);
             throw new MojoExecutionException(e.getMessage(), e);
