@@ -8,48 +8,55 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.wetator.core.WetatorEngine;
-import org.wetator.exception.InvalidInputException;
 
 import java.io.File;
 
+/**
+ * This is the main Mojo for executing wetator tests.
+ */
 @Mojo(name = "execute", defaultPhase = LifecyclePhase.INTEGRATION_TEST)
 public class WetatorMojo extends AbstractMojo {
 
+    /**
+     * File pattern for the weator test files.
+     */
+    private static final String INCLUDE_FILE_PATTERN = "**\\*.wet";
+
+    /**
+     * Path with filename to the config file in file system.
+     */
     @Parameter(property = "execute.configFile")
     private String configFile;
 
+    /**
+     * Directory where the test files resides.
+     */
     @Parameter(property = "execute.testFileDir")
     private String testFileDir;
-
-    @Parameter(defaultValue = "${project.build.directory}", property = "outputDir", required = true)
-    private File outputDirectory;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            final WetatorEngine tmpWetatorEngine = new WetatorEngine();
-            tmpWetatorEngine.setConfigFileName(configFile);
+            final WetatorEngine wetatorEngine = new WetatorEngine();
+            wetatorEngine.setConfigFileName(configFile);
 
-            tmpWetatorEngine.init();
+            wetatorEngine.init();
 
             // add all files
             final DirectoryScanner directoryScanner = new DirectoryScanner();
             directoryScanner.setBasedir(testFileDir);
-            directoryScanner.setIncludes(new String[]{"**\\*.wet"});
+            directoryScanner.setIncludes(new String[]{INCLUDE_FILE_PATTERN});
             directoryScanner.setCaseSensitive(true);
             directoryScanner.scan();
 
-            final String[] tmpListOfFiles = directoryScanner.getIncludedFiles();
+            final String[] weatorTestFilename = directoryScanner.getIncludedFiles();
 
-            for (int i = 0; i < tmpListOfFiles.length; i++) {
-                final String tmpFileName = tmpListOfFiles[i];
-                tmpWetatorEngine.addTestCase(tmpFileName, new File(directoryScanner.getBasedir(), tmpFileName));
+            for (int i = 0; i < weatorTestFilename.length; i++) {
+                final String filename = weatorTestFilename[i];
+                wetatorEngine.addTestCase(filename, new File(directoryScanner.getBasedir(), filename));
             }
 
-            tmpWetatorEngine.executeTests();
-        } catch (InvalidInputException e) {
-            getLog().error(e.getMessage(), e);
-            throw new MojoExecutionException(e.getMessage(), e);
+            wetatorEngine.executeTests();
         } catch (Exception e) {
             getLog().error(e.getMessage(), e);
             throw new MojoExecutionException(e.getMessage(), e);
