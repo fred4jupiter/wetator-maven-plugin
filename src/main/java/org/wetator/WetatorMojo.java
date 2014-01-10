@@ -45,26 +45,28 @@ public class WetatorMojo extends AbstractMojo {
 
             wetatorEngine.init();
 
-            // add all files
-            final DirectoryScanner directoryScanner = new DirectoryScanner();
-            directoryScanner.setBasedir(testFileDir);
-            directoryScanner.setIncludes(new String[]{INCLUDE_FILE_PATTERN});
-            directoryScanner.scan();
-
-            final String[] weatorTestFilenames = directoryScanner.getIncludedFiles();
-
-            for (int i = 0; i < weatorTestFilenames.length; i++) {
-                final String filename = weatorTestFilenames[i];
-                getLog().info("adding test file: " + filename);
-                wetatorEngine.addTestCase(filename, new File(directoryScanner.getBasedir(), filename));
+            final String[] weatorTestFilenames = scanForWetatorTestFiles();
+            for (String weatorTestFilename : weatorTestFilenames) {
+                getLog().info("adding test file: " + weatorTestFilename);
+                wetatorEngine.addTestCase(weatorTestFilename, new File(testFileDir, weatorTestFilename));
             }
 
             wetatorEngine.executeTests();
 
+            getLog().info("find wetator test results in: " + wetatorEngine.getConfiguration().getOutputDir().getCanonicalPath());
             getLog().info("wetator test execution complete!");
         } catch (Exception e) {
             getLog().error(e.getMessage(), e);
             throw new MojoExecutionException(e.getMessage(), e);
         }
+    }
+
+    private String[] scanForWetatorTestFiles() {
+        final DirectoryScanner directoryScanner = new DirectoryScanner();
+        directoryScanner.setBasedir(testFileDir);
+        directoryScanner.setIncludes(new String[]{INCLUDE_FILE_PATTERN});
+        directoryScanner.scan();
+
+        return directoryScanner.getIncludedFiles();
     }
 }
