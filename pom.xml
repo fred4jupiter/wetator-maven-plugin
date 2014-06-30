@@ -4,13 +4,37 @@
 
     <groupId>org.wetator</groupId>
     <artifactId>wetator-maven-plugin</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <packaging>maven-plugin</packaging>
 
     <name>wetator-maven-plugin Maven Plugin</name>
 
-    <url>http://www.wetator.org/</url>
+    <description>Plugin to run Wetator tests with Maven. The Weator homepage: http://www.wetator.org/</description>
+
+    <url>https://github.com/fred4jupiter/wetator-maven-plugin</url>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:https://github.com/fred4jupiter/wetator-maven-plugin.git</connection>
+        <developerConnection>scm:git:https://github.com/fred4jupiter/wetator-maven-plugin.git</developerConnection>
+        <url>https://github.com/fred4jupiter/wetator-maven-plugin</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>mis</id>
+            <name>Michael Staehler</name>
+            <email>hamsterhase@gmail.com</email>
+        </developer>
+    </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -33,11 +57,10 @@
             <artifactId>plexus-utils</artifactId>
             <version>3.0.16</version>
         </dependency>
-
         <dependency>
             <groupId>org.wetator</groupId>
             <artifactId>wetator</artifactId>
-            <version>0.9.15-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -70,19 +93,11 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5</version>
+            </plugin>
         </plugins>
     </build>
-
-    <repositories>
-        <repository>
-            <id>sonatype-repo</id>
-            <url>https://oss.sonatype.org/content/groups/staging</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 </project>
