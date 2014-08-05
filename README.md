@@ -6,7 +6,7 @@ This is a first try to implement a maven plugin for running Weator acceptance te
 You can find the Wetator homepage at [http://www.wetator.org/](http://www.wetator.org/).
 
 ## Build Status ##
-[![Build Status](https://travis-ci.org/guerda/wetator-maven-plugin.svg?branch=master)](https://travis-ci.org/guerda/wetator-maven-plugin)
+[![Build Status](https://travis-ci.org/fred4jupiter/wetator-maven-plugin.svg?branch=master)](https://travis-ci.org/fred4jupiter/wetator-maven-plugin)
 
 ## Usage ##
 To use the plugin you have to add this to your maven pom.xml plugins section:
