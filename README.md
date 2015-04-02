@@ -28,7 +28,7 @@ To run the tests run:
     mvn org.wetator:wetator-maven-plugin:execute
 
 ## Remarks ##
-The wetator-maven-plugin is using the wetator dependency:
+The wetator-maven-plugin is using the Wetator dependency:
 
     <dependency>
 	    <groupId>org.wetator</groupId>
