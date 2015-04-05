@@ -9,7 +9,7 @@
 
     <name>wetator-maven-plugin Maven Plugin</name>
 
-    <description>Plugin to run Wetator tests with Maven. The Weator homepage: http://www.wetator.org/</description>
+    <description>Plugin to run Wetator tests with Maven. The Wetator homepage: http://www.wetator.org/</description>
 
     <url>https://github.com/fred4jupiter/wetator-maven-plugin</url>
 
