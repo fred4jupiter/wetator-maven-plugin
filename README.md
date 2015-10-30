@@ -35,3 +35,7 @@ The wetator-maven-plugin is using the Wetator dependency:
 	    <artifactId>wetator</artifactId>
 	    <version>1.0.0</version>
     </dependency>
+
+## License ##
+
+This plugin is licensed under [Apache 2.0](http://choosealicense.com/licenses/apache-2.0/ "Apache 2.0").
