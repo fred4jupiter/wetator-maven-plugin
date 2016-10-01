@@ -1,7 +1,7 @@
 wetator-maven-plugin
 ====================
 
-This is a first try to implement a Maven plugin for running Weator acceptance tests.
+This is a first try to implement a Maven plugin for running Wetator tests.
 
 You can find the Wetator homepage at [http://www.wetator.org/](http://www.wetator.org/).
 
