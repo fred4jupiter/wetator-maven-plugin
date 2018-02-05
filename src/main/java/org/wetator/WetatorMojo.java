@@ -1,14 +1,17 @@
 package org.wetator;
 
+import java.io.File;
+import java.util.Arrays;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.util.DirectoryScanner;
+import org.wetator.core.IProgressListener;
 import org.wetator.core.WetatorEngine;
-
-import java.io.File;
+import org.wetator.progresslistener.StdOutProgressListener;
 
 /**
  * This is the main Mojo for executing wetator tests.
@@ -16,10 +19,16 @@ import java.io.File;
 @Mojo(name = "execute")
 public class WetatorMojo extends AbstractMojo {
 
+    private static final String WET_FILE_PATTERN = "**\\*.wet";
+    private static final String WETT_FILE_PATTERN = "**\\*.wett";
+    private static final String XLS_FILE_PATTERN = "**\\*.xls";
+    private static final String XLSX_FILE_PATTERN = "**\\*.xlsx";
+
     /**
-     * File pattern for the weator test files.
+     * File patterns for the wetator test files.
      */
-    private static final String INCLUDE_FILE_PATTERN = "**\\*.wet";
+    static final String[] DEFAULT_INCLUDE_PATTERN = new String[] { WET_FILE_PATTERN, WETT_FILE_PATTERN, XLS_FILE_PATTERN, XLSX_FILE_PATTERN };
+    static final String[] DEFAULT_EXCLUDE_PATTERN = new String[] {};
 
     /**
      * Path with filename to the config file in file system.
@@ -33,38 +42,95 @@ public class WetatorMojo extends AbstractMojo {
     @Parameter(property = "execute.testFileDir")
     private String testFileDir;
 
+    /**
+     * Filename patterns for the test files that shall be included.
+     * <p>
+     * Default values (when this is left empty) are:
+     * {@value DEFAULT_INCLUDE_PATTERN}
+     */
+    @Parameter(property = "execute.includePattern")
+    private String[] includePattern;
+
+    /**
+     * Filename patterns for the test files that shall be included.
+     * <p>
+     * Default is: {@value DEFAULT_EXCLUDE_PATTERN}
+     */
+    @Parameter(property = "execute.excludePattern")
+    private String[] excludePattern;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        // Need to set the default values of array/list parameter manually as this is
+        // not possible via the annotations.
+        // See:
+        // https://stackoverflow.com/questions/1659087/how-to-configure-defaults-for-a-parameter-with-multiple-values-for-a-maven-plugi
+        if (includePattern == null || includePattern.length == 0) {
+            includePattern = DEFAULT_INCLUDE_PATTERN;
+        }
+        if (excludePattern == null || excludePattern.length == 0) {
+            excludePattern = DEFAULT_EXCLUDE_PATTERN;
+        }
+
         getLog().info("start running wetator tests ...");
         getLog().info("using config file: " + configFile);
         getLog().info("using wetator test file directory: " + testFileDir);
+        getLog().info("using include pattern: " + Arrays.toString(includePattern));
+        getLog().info("using exclude pattern: " + Arrays.toString(excludePattern));
 
+        final WetatorEngine wetatorEngine = new WetatorEngine();
         try {
-            final WetatorEngine wetatorEngine = new WetatorEngine();
             wetatorEngine.setConfigFileName(configFile);
 
             wetatorEngine.init();
 
-            final String[] weatorTestFilenames = scanForWetatorTestFiles();
-            for (String weatorTestFilename : weatorTestFilenames) {
+            final String[] wetatorTestFilenames = scanForWetatorTestFiles(testFileDir, includePattern, excludePattern);
+            getLog().info(wetatorTestFilenames.length + " test files were found!");
+            for (String weatorTestFilename : wetatorTestFilenames) {
                 getLog().info("adding test file: " + weatorTestFilename);
                 wetatorEngine.addTestCase(weatorTestFilename, new File(testFileDir, weatorTestFilename));
             }
+
+            getLog().info("Executing tests...");
+
+            final IProgressListener tmpProgressListener = new StdOutProgressListener();
+            wetatorEngine.addProgressListener(tmpProgressListener);
 
             wetatorEngine.executeTests();
 
             getLog().info("find wetator test results in: " + wetatorEngine.getConfiguration().getOutputDir().getCanonicalPath());
             getLog().info("wetator test execution complete!");
-        } catch (Exception e) {
-            getLog().error(e.getMessage(), e);
+
+        } catch (final Exception e) {
+            System.out.println("Wetator execution failed: " + e.getMessage());
+            getLog().error("Wetator execution failed:", e);
+
             throw new MojoExecutionException(e.getMessage(), e);
+        } finally {
+            wetatorEngine.shutdown();
         }
+
     }
 
-    private String[] scanForWetatorTestFiles() {
+    /**
+     * Scans the given directory and finds all files that match the given include
+     * and exclude patterns.
+     *
+     * @param pTestFileDir
+     *            directory of the test files
+     * @param pIncludePattern
+     *            pattern of files that shall be included
+     * @param pExcludePattern
+     *            pattern of files that shall be excluded
+     * @param includeFilePattern
+     *            filename pattern
+     * @return the name of all test files that were found
+     */
+    String[] scanForWetatorTestFiles(String pTestFileDir, String[] pIncludePattern, String[] pExcludePattern) {
         final DirectoryScanner directoryScanner = new DirectoryScanner();
-        directoryScanner.setBasedir(testFileDir);
-        directoryScanner.setIncludes(new String[]{INCLUDE_FILE_PATTERN});
+        directoryScanner.setBasedir(pTestFileDir);
+        directoryScanner.setIncludes(pIncludePattern);
+        directoryScanner.setExcludes(pExcludePattern);
         directoryScanner.scan();
 
         return directoryScanner.getIncludedFiles();

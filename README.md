@@ -12,16 +12,23 @@ You can find the Wetator homepage at [http://www.wetator.org/](http://www.wetato
 To use the plugin you have to add this to your Maven pom.xml plugins section:
 
     <plugin>
-	    <groupId>org.wetator</groupId>
-	    <artifactId>wetator-maven-plugin</artifactId>
-	    <version>1.0.2-SNAPSHOT</version>
-	    <configuration>
-		    <configFile>src/test/resources/wetator.config</configFile>
-		    <testFileDir>src/test/resources/wetator</testFileDir>
-	    </configuration>
+        <groupId>org.wetator</groupId>
+        <artifactId>wetator-maven-plugin</artifactId>
+        <version>1.0.2-SNAPSHOT</version>
+        <configuration>
+            <configFile>src/test/resources/wetator.config</configFile>
+            <testFileDir>src/test/resources/wetator</testFileDir>
+            <includePattern>
+              <includePattern>**/*.wet</includePattern>
+              <includePattern>**/*.wett</includePattern>
+            </includePattern>
+            <excludePattern>
+              <excludePattern>**/modules/**</excludePattern>
+            </excludePattern>
+        </configuration>
     </plugin>
 
-By default the plugin includes all *.wet files within the 'testFileDir' folder.
+By default the plugin includes all *.wet, *.wett, *.xls, *.xlsx files within the 'testFileDir' folder.
 
 To run the tests run:
 
@@ -31,9 +38,9 @@ To run the tests run:
 The wetator-maven-plugin is using the Wetator dependency:
 
     <dependency>
-	    <groupId>org.wetator</groupId>
-	    <artifactId>wetator</artifactId>
-	    <version>1.0.0</version>
+        <groupId>org.wetator</groupId>
+        <artifactId>wetator</artifactId>
+        <version>1.8.0</version>
     </dependency>
 
 ## License ##
