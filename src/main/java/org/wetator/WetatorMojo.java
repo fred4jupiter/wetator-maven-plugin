@@ -2,21 +2,25 @@ package org.wetator;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.wetator.core.IProgressListener;
+import org.wetator.core.WetatorConfiguration;
 import org.wetator.core.WetatorEngine;
 import org.wetator.progresslistener.StdOutProgressListener;
 
 /**
  * This is the main Mojo for executing wetator tests.
  */
-@Mojo(name = "execute")
+@Mojo(name = "execute", defaultPhase = LifecyclePhase.INTEGRATION_TEST)
 public class WetatorMojo extends AbstractMojo {
 
     private static final String WET_FILE_PATTERN = "**\\*.wet";
@@ -59,6 +63,14 @@ public class WetatorMojo extends AbstractMojo {
     @Parameter(property = "execute.excludePattern")
     private String[] excludePattern;
 
+    /**
+     * The URL to the website under test.
+     * <p>
+     * Overwrites the wetator.baseUrl parameter from the wetator.config file!
+     */
+    @Parameter(property = "execute.baseUrl")
+    private String baseUrl;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         // Need to set the default values of array/list parameter manually as this is
@@ -72,15 +84,26 @@ public class WetatorMojo extends AbstractMojo {
             excludePattern = DEFAULT_EXCLUDE_PATTERN;
         }
 
+        // this map contains the configuration parameter for the wetator engine that
+        // overwrites the parameter from the configuration file
+        Map<String, String> externalConfigurations = new TreeMap<>();
+        if(baseUrl != null) {
+            externalConfigurations.put(WetatorConfiguration.PROPERTY_BASE_URL, baseUrl);
+        }
+
         getLog().info("start running wetator tests ...");
         getLog().info("using config file: " + configFile);
         getLog().info("using wetator test file directory: " + testFileDir);
         getLog().info("using include pattern: " + Arrays.toString(includePattern));
         getLog().info("using exclude pattern: " + Arrays.toString(excludePattern));
+        getLog().info("using base URL: " + externalConfigurations.get(WetatorConfiguration.PROPERTY_BASE_URL));
+
 
         final WetatorEngine wetatorEngine = new WetatorEngine();
         try {
             wetatorEngine.setConfigFileName(configFile);
+
+            wetatorEngine.setExternalProperties(externalConfigurations);
 
             wetatorEngine.init();
 

@@ -101,10 +101,4 @@
         </plugins>
     </build>
 
-    <distributionManagement>
-        <repository>
-            <id>local-repository</id>
-            <url>file:${basedir}/target/release</url>
-        </repository>
-    </distributionManagement>
 </project>
